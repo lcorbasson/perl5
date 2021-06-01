@@ -288,6 +288,9 @@ sub _move {
     if ($^O eq 'cygwin') {
         sleep(1);
         return 1 if rename $from, $to; # let's try again
+	# last resort
+        sleep(1);
+        return 1 if system(('mv', $from, $to)) == 0; # let's try with mv
     }
 
     # Did rename return an error even though it succeeded, because $to
