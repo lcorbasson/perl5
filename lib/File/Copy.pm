@@ -282,6 +282,14 @@ sub _move {
 
     return 1 if rename $from, $to;
 
+    # Did rename not work because many renames are/were ongoing,
+    # and Cygwin couldn't allocate file handles?
+    # (see CPAN #82295)
+    if ($^O eq 'cygwin') {
+        sleep(1);
+        return 1 if rename $from, $to; # let's try again
+    }
+
     # Did rename return an error even though it succeeded, because $to
     # is on a remote NFS file system, and NFS lost the server's ack?
     return 1 if defined($fromsz) && !-e $from &&           # $from disappeared
